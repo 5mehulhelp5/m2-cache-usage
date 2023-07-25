@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Infrangible_CacheUsage::infrangible_cache_usage" title="Cache Usage" module="Infrangible_CacheUsage" sortOrder="990" resource="Infrangible_CacheUsage::infrangible_cache_usage" parent="Infrangible_Foundation::menu"/>
+        <add id="Infrangible_CacheUsage::infrangible_cache_usage_fpc" title="Full Page Cache" module="Infrangible_CacheUsage" sortOrder="10" resource="Infrangible_CacheUsage::infrangible_cache_usage" parent="Infrangible_CacheUsage::infrangible_cache_usage" action="infrangible_cache_usage/fullPageCache/index"/>
+        <add id="Infrangible_CacheUsage::infrangible_cache_usage_block" title="Block Cache" module="Infrangible_CacheUsage" sortOrder="20" resource="Infrangible_CacheUsage::infrangible_cache_usage" parent="Infrangible_CacheUsage::infrangible_cache_usage" action="infrangible_cache_usage/blockCache/index"/>
+        <add id="Infrangible_CacheUsage::infrangible_cache_usage_clear" title="Clear Cache Usage" module="Infrangible_CacheUsage" sortOrder="30" resource="Infrangible_CacheUsage::infrangible_cache_usage" parent="Infrangible_CacheUsage::infrangible_cache_usage" action="infrangible_cache_usage/task/clear"/>
+        <add id="Infrangible_CacheUsage::infrangible_cache_usage_reduce" title="Reduce Cache Usage" module="Infrangible_CacheUsage" sortOrder="40" resource="Infrangible_CacheUsage::infrangible_cache_usage" parent="Infrangible_CacheUsage::infrangible_cache_usage" action="infrangible_cache_usage/task/reduce"/>
+    </menu>
+</config>

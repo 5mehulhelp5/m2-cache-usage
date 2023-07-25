@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\App\PageCache\Kernel">
+        <plugin name="infrangible_cache_usage" type="Infrangible\CacheUsage\Plugin\Framework\App\PageCache\Kernel"/>
+    </type>
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="cache_usage_clear" xsi:type="object">Infrangible\CacheUsage\Console\Command\Task\Clear</item>
+                <item name="cache_usage_reduce" xsi:type="object">Infrangible\CacheUsage\Console\Command\Task\Reduce</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

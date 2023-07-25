@@ -1,0 +1,400 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="infrangible_cache_usage" translate="label" type="text" sortOrder="990" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Cache Usage</label>
+            <tab>infrangible</tab>
+            <resource>Infrangible_CacheUsage::config_infrangible_cache_usage</resource>
+            <group id="fpc" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Full Page Cache</label>
+                <field id="enable" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Collection of Data</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="show_summary" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Summary</label>
+                    <comment>Display a summary of full page cache information.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="blocks" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Block Cache</label>
+                <field id="enable" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Collection of Data</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="show_summary" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Summary</label>
+                    <comment>Display a summary of uncacheable, cached, uncached and default blocks.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="mark_uncacheable" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mark Uncacheable</label>
+                    <comment>Display a red border around uncacheable blocks.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="mark_cached" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mark Cached</label>
+                    <comment>Display a green border around cached blocks.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="mark_uncached" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mark Uncached</label>
+                    <comment>Display a yellow border around uncached blocks.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="mark_default" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mark Default</label>
+                    <comment>Display a grey border around default blocks.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+        <section id="task_cache_usage_clear" translate="label" type="text" sortOrder="990" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Clear Cache Usage</label>
+            <tab>tasks</tab>
+            <resource>Infrangible_CacheUsage::config_infrangible_cache_usage</resource>
+            <group id="settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Settings</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="max_memory" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Max Memory</label>
+                    <comment>In MB</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="wait_for_predecessor" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Wait for Predecessor</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="depends_on" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Depends On</label>
+                    <comment>Task names separated by semicolon</comment>
+                </field>
+            </group>
+            <group id="logging" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Logging</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="log_level" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Log Level</label>
+                    <source_model>Infrangible\Task\Model\Config\Source\LogLevel</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="log_warn_as_error" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Log Warning as Error</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="summary_success" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Success Summary</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="send" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="sender" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sender</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="recipients" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="copy_recipients" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="blind_copy_recipients" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Blind Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="subject" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Subject</label>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="summary_error" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Error Summary</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="send" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="sender" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sender</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="recipients" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="copy_recipients" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="blind_copy_recipients" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Blind Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="subject" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Subject</label>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+        <section id="task_cache_usage_reduce" translate="label" type="text" sortOrder="991" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Reduce Cache Usage</label>
+            <tab>tasks</tab>
+            <resource>Infrangible_CacheUsage::config_infrangible_cache_usage</resource>
+            <group id="settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Settings</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="max_memory" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Max Memory</label>
+                    <comment>In MB</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="wait_for_predecessor" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Wait for Predecessor</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="depends_on" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Depends On</label>
+                    <comment>Task names separated by semicolon</comment>
+                </field>
+            </group>
+            <group id="logging" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Logging</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="log_level" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Log Level</label>
+                    <source_model>Infrangible\Task\Model\Config\Source\LogLevel</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="log_warn_as_error" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Log Warning as Error</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="summary_success" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Success Summary</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="send" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="sender" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sender</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="recipients" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="copy_recipients" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="blind_copy_recipients" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Blind Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="subject" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Subject</label>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="summary_error" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Error Summary</label>
+                <field id="overwrite_task_general" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Overwrite Task General Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="send" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                    </depends>
+                </field>
+                <field id="sender" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sender</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="recipients" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="copy_recipients" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="blind_copy_recipients" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Blind Copy Recipients</label>
+                    <comment>Divided by semicolon</comment>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+                <field id="subject" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Subject</label>
+                    <depends>
+                        <field id="overwrite_task_general">1</field>
+                        <field id="send">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="execution" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Execution</label>
+                <field id="cron_expression" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Cron Expression</label>
+                    <backend_model>Infrangible\CacheUsage\Task\Reduce\Cron\Execution</backend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

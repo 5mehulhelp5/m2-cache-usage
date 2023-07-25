@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="task_cache_usage_reduce" instance="Infrangible\CacheUsage\Task\Reduce\Cron" method="run">
+            <schedule>0 * * * *</schedule>
+        </job>
+    </group>
+</config>

@@ -1,0 +1,33 @@
+{
+    "name": "infrangible/m2-cache-usage",
+    "description": "Infrangible Magento 2 Cache Usage",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": "MIT",
+    "keywords": [
+        "Magento"
+    ],
+    "homepage": "https://github.com/infrangible-dev/m2-cache-usage",
+    "authors": [
+        {
+            "name": "Andreas Knollmann",
+            "email": "a.knollmann@infrangible.dev",
+            "homepage": "https://www.infrangible.dev",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "magento/framework": "~101.0.0|~102.0.0|~103.0.0",
+        "infrangible/m2-backend-widget": "~1.0",
+        "infrangible/m2-task": "~1.0|~2.0"
+    },
+    "autoload": {
+        "files": [
+            "src/registration.php"
+        ],
+        "psr-4": {
+            "Infrangible\\CacheUsage\\": "src"
+        }
+    }
+}
