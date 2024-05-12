@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Plugin\Framework\App\PageCache;
 
+use FeWeDev\Base\Arrays;
+use Infrangible\CacheUsage\Model\Cache;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\PageCache\Identifier;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\PageCache\Model\Cache\Type;
-use Infrangible\CacheUsage\Model\Cache;
-use Tofex\Help\Arrays;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Kernel
@@ -49,8 +51,8 @@ class Kernel
         Http $request,
         Identifier $identifier,
         Type $fullPageCache = null,
-        SerializerInterface $serializer = null)
-    {
+        SerializerInterface $serializer = null
+    ) {
         $this->arrayHelper = $arrayHelper;
 
         $this->cache = $cache;
@@ -116,23 +118,27 @@ class Kernel
      */
     public function beforeProcess(
         \Magento\Framework\App\PageCache\Kernel $subject,
-        \Magento\Framework\App\Response\Http $response): array
-    {
+        \Magento\Framework\App\Response\Http $response
+    ): array {
         if (preg_match('/public.*s-maxage=(\d+)/', $response->getHeader('Cache-Control')->getFieldValue(), $matches)) {
             $httpResponseCode = $response->getHttpResponseCode();
 
-            if (($httpResponseCode == 200 || $httpResponseCode == 404) &&
-                ($this->request->isGet() || $this->request->isHead())) {
+            if (($httpResponseCode == 200 || $httpResponseCode == 404)
+                && ($this->request->isGet() || $this->request->isHead())) {
 
                 $tagsHeader = $response->getHeader('X-Magento-Tags');
                 $tags = $tagsHeader ? explode(',', $tagsHeader->getFieldValue()) : [];
 
-                $maxAge = $matches[ 1 ];
+                $maxAge = $matches[1];
 
                 $serializedData = $this->serializer->serialize($this->getData());
 
-                $this->fullPageCache->save($serializedData, sprintf('%s_additional', $this->identifier->getValue()),
-                    $tags, $maxAge + 1);
+                $this->fullPageCache->save(
+                    $serializedData,
+                    sprintf('%s_additional', $this->identifier->getValue()),
+                    $tags,
+                    intval($maxAge) + 1
+                );
             }
         }
 

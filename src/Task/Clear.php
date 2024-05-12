@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Task;
 
 use Exception;
+use FeWeDev\Base\Files;
 use Infrangible\CacheUsage\Model\ResourceModel\FullPageCache\Collection;
 use Infrangible\CacheUsage\Model\ResourceModel\FullPageCache\CollectionFactory;
 use Infrangible\Core\Helper\Database;
@@ -14,11 +17,10 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Store\Model\App\Emulation;
 use Psr\Log\LoggerInterface;
-use Tofex\Help\Files;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Clear
@@ -37,7 +39,7 @@ class Clear
     private $emptyRun = true;
 
     /**
-     * @param Files                                                                    $fileHelper
+     * @param Files                                                                    $files
      * @param Registry                                                                 $registryHelper
      * @param Data                                                                     $helper
      * @param Database                                                                 $databaseHelper
@@ -51,7 +53,7 @@ class Clear
      * @param \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\CollectionFactory $blockCacheCollectionFactory
      */
     public function __construct(
-        Files $fileHelper,
+        Files $files,
         Registry $registryHelper,
         Data $helper,
         Database $databaseHelper,
@@ -62,10 +64,19 @@ class Clear
         RunFactory $runFactory,
         \Infrangible\Task\Model\ResourceModel\RunFactory $runResourceFactory,
         CollectionFactory $fullPageCacheCollectionFactory,
-        \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\CollectionFactory $blockCacheCollectionFactory)
-    {
-        parent::__construct($fileHelper, $registryHelper, $helper, $logging, $appEmulation, $directoryList,
-            $transportBuilder, $runFactory, $runResourceFactory);
+        \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\CollectionFactory $blockCacheCollectionFactory
+    ) {
+        parent::__construct(
+            $files,
+            $registryHelper,
+            $helper,
+            $logging,
+            $appEmulation,
+            $directoryList,
+            $transportBuilder,
+            $runFactory,
+            $runResourceFactory
+        );
 
         $this->databaseHelper = $databaseHelper;
 
@@ -97,8 +108,11 @@ class Clear
             $this->logging->info(__('Removing %1 full page cache entries.', count($fullPageCacheIds)));
 
             foreach (array_chunk($fullPageCacheIds, 100) as $fullPageCacheIdsChunk) {
-                $this->databaseHelper->deleteTableData($dbAdapter, 'cache_usage_fpc',
-                    sprintf('id IN (%s)', implode(',', $fullPageCacheIdsChunk)));
+                $this->databaseHelper->deleteTableData(
+                    $dbAdapter,
+                    'cache_usage_fpc',
+                    sprintf('id IN (%s)', implode(',', $fullPageCacheIdsChunk))
+                );
             }
 
             $this->emptyRun = false;
@@ -114,8 +128,11 @@ class Clear
             $this->logging->info(__('Removing %1 block page cache entries.', count($blockCacheIds)));
 
             foreach (array_chunk($blockCacheIds, 100) as $blockCacheIdsChunk) {
-                $this->databaseHelper->deleteTableData($dbAdapter, 'cache_usage_block',
-                    sprintf('id IN (%s)', implode(',', $blockCacheIdsChunk)));
+                $this->databaseHelper->deleteTableData(
+                    $dbAdapter,
+                    'cache_usage_block',
+                    sprintf('id IN (%s)', implode(',', $blockCacheIdsChunk))
+                );
             }
 
             $this->emptyRun = false;
@@ -141,8 +158,8 @@ class Clear
      * @return void
      */
     protected function prepareBlockCacheCollection(
-        \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\Collection $blockCacheCollection): void
-    {
+        \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\Collection $blockCacheCollection
+    ): void {
     }
 
     /**

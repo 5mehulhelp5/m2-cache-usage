@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Traits;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 trait BlockCache
@@ -38,7 +40,7 @@ trait BlockCache
      */
     protected function getTitle(): string
     {
-        return __('Block Cache');
+        return __('Block Cache')->render();
     }
 
     /**
@@ -86,6 +88,6 @@ trait BlockCache
      */
     protected function getObjectNotFoundMessage(): string
     {
-        return __('Unable to find block cache with id: %s!');
+        return __('Unable to find block cache with id: %s!')->render();
     }
 }

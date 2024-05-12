@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Model\ResourceModel;
 
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
-use Zend_Date;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class BlockCache
@@ -31,12 +32,11 @@ class BlockCache
     {
         parent::_beforeSave($object);
 
-        /** @var \Infrangible\CacheUsage\Model\FullPageCache $object */
         if ($object->isObjectNew()) {
-            $object->setCreatedAt(Zend_Date::now());
+            $object->setDataUsingMethod('created_at', gmdate('Y-m-d H:i:s'));
         }
 
-        $object->setUpdatedAt(Zend_Date::now());
+        $object->setDataUsingMethod('updated_at', gmdate('Y-m-d H:i:s'));
 
         return $this;
     }

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Traits;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 trait FullPageCache
@@ -38,7 +40,7 @@ trait FullPageCache
      */
     protected function getTitle(): string
     {
-        return __('Full Page Cache');
+        return __('Full Page Cache')->render();
     }
 
     /**
@@ -86,6 +88,6 @@ trait FullPageCache
      */
     protected function getObjectNotFoundMessage(): string
     {
-        return __('Unable to find full page cache with id: %s!');
+        return __('Unable to find full page cache with id: %s!')->render();
     }
 }

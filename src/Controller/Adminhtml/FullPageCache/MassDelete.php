@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Controller\Adminhtml\FullPageCache;
 
 use Infrangible\CacheUsage\Traits\FullPageCache;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class MassDelete
@@ -19,6 +21,6 @@ class MassDelete
      */
     protected function getObjectsDeletedMessage(): string
     {
-        return __('Successfully deleted %s full page caches.');
+        return __('Successfully deleted %s full page caches.')->render();
     }
 }

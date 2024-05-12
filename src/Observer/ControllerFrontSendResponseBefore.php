@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Observer;
 
-use Magento\Framework\App\Response\Http;
-use Magento\Framework\Event\Observer;
-use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Exception\AlreadyExistsException;
 use Infrangible\CacheUsage\Model\BlockCacheFactory;
 use Infrangible\CacheUsage\Model\Cache;
 use Infrangible\CacheUsage\Model\FullPageCacheFactory;
 use Infrangible\Core\Helper\Stores;
+use Magento\Framework\App\Response\Http;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\AlreadyExistsException;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class ControllerFrontSendResponseBefore
@@ -38,11 +40,11 @@ class ControllerFrontSendResponseBefore
     protected $blockCacheResourceFactory;
 
     /**
-     * @param Stores                                                     $storeHelper
-     * @param Cache                                                      $cache
-     * @param FullPageCacheFactory                                       $fullPageCacheFactory
+     * @param Stores                                                           $storeHelper
+     * @param Cache                                                            $cache
+     * @param FullPageCacheFactory                                             $fullPageCacheFactory
      * @param \Infrangible\CacheUsage\Model\ResourceModel\FullPageCacheFactory $fullPageCacheResourceFactory
-     * @param BlockCacheFactory                                          $blockCacheFactory
+     * @param BlockCacheFactory                                                $blockCacheFactory
      * @param \Infrangible\CacheUsage\Model\ResourceModel\BlockCacheFactory    $blockCacheResourceFactory
      */
     public function __construct(
@@ -51,8 +53,8 @@ class ControllerFrontSendResponseBefore
         FullPageCacheFactory $fullPageCacheFactory,
         \Infrangible\CacheUsage\Model\ResourceModel\FullPageCacheFactory $fullPageCacheResourceFactory,
         BlockCacheFactory $blockCacheFactory,
-        \Infrangible\CacheUsage\Model\ResourceModel\BlockCacheFactory $blockCacheResourceFactory)
-    {
+        \Infrangible\CacheUsage\Model\ResourceModel\BlockCacheFactory $blockCacheResourceFactory
+    ) {
         $this->storeHelper = $storeHelper;
 
         $this->cache = $cache;
@@ -78,7 +80,6 @@ class ControllerFrontSendResponseBefore
         $httpResponseCode = $response->getHttpResponseCode();
 
         if (($httpResponseCode == 200 || $httpResponseCode == 404) && ($request->isGet() || $request->isHead())) {
-            /** @noinspection PhpUndefinedMethodInspection */
             $content = $response->getContent();
 
             if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/fpc/enable')) {
@@ -89,15 +90,15 @@ class ControllerFrontSendResponseBefore
                 $fullPageCache->setAction($this->cache->getActionName());
                 $fullPageCache->setPath($this->cache->getPathParameters());
                 $fullPageCache->setQuery($this->cache->getQueryParameters());
-                $fullPageCache->setCacheable($this->cache->isCacheable());
-                $fullPageCache->setCached($this->cache->isCached());
-                $fullPageCache->setDuration($this->cache->getDuration());
+                $fullPageCache->setCacheable((int) $this->cache->isCacheable());
+                $fullPageCache->setCached((int) $this->cache->isCached());
+                $fullPageCache->setDuration((int) $this->cache->getDuration());
 
                 $this->fullPageCacheResourceFactory->create()->save($fullPageCache);
             }
 
             if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/enable')) {
-                if ( ! $this->cache->isCached()) {
+                if (!$this->cache->isCached()) {
                     $blockCacheResource = $this->blockCacheResourceFactory->create();
 
                     $blocks = $this->cache->getBlocks();
@@ -119,10 +120,10 @@ class ControllerFrontSendResponseBefore
                             if ($block->isUncacheable()) {
                                 $blockCache->setCacheable(0);
                                 $blockCache->setCached(0);
-                            } else if ($block->isCached()) {
+                            } elseif ($block->isCached()) {
                                 $blockCache->setCacheable(1);
                                 $blockCache->setCached(1);
-                            } else if ($block->isUncached()) {
+                            } elseif ($block->isUncached()) {
                                 $blockCache->setCacheable(1);
                                 $blockCache->setCached(0);
                             } else {
@@ -136,8 +137,8 @@ class ControllerFrontSendResponseBefore
                 }
             }
 
-            if ( ! $request->isAjax() && $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/fpc/enable') &&
-                $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/fpc/show_summary', false)) {
+            if (!$request->isAjax() && $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/fpc/enable')
+                && $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/fpc/show_summary')) {
 
                 $content .= '<pre>';
                 $content .= sprintf("%s\n---------------\n", __('Full Page Cache'));
@@ -152,8 +153,8 @@ class ControllerFrontSendResponseBefore
                 $content .= '</pre>';
             }
 
-            if ( ! $request->isAjax() && $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/enable') &&
-                $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/show_summary', false)) {
+            if (!$request->isAjax() && $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/enable')
+                && $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/show_summary')) {
 
                 $cachedBlocks = $this->cache->getCachedBlocks();
 
@@ -163,9 +164,13 @@ class ControllerFrontSendResponseBefore
                     $content .= '<pre>';
                     $content .= sprintf("%s\n--------------------\n", __('Cached Blocks'));
                     foreach ($cachedBlocks as $block) {
-                        $content .= sprintf("%s: %s: %s: %s\n", $block->getLayoutName(),
+                        $content .= sprintf(
+                            "%s: %s: %s: %s\n",
+                            $block->getLayoutName(),
                             $this->cache->isCached() ? 'FPC' : sprintf('%d ms', $block->getDuration()),
-                            $block->getClassName(), $block->getTemplateName());
+                            $block->getClassName(),
+                            $block->getTemplateName()
+                        );
                     }
                     $content .= '</pre>';
                 }
@@ -178,9 +183,13 @@ class ControllerFrontSendResponseBefore
                     $content .= '<pre>';
                     $content .= sprintf("%s\n--------------------\n", __('Uncached Blocks'));
                     foreach ($uncachedBlocks as $block) {
-                        $content .= sprintf("%s: %s: %s: %s\n", $block->getLayoutName(),
-                            $this->cache->isCached() ? 'FPC' : $block->getDuration(), $block->getClassName(),
-                            $block->getTemplateName());
+                        $content .= sprintf(
+                            "%s: %s: %s: %s\n",
+                            $block->getLayoutName(),
+                            $this->cache->isCached() ? 'FPC' : $block->getDuration(),
+                            $block->getClassName(),
+                            $block->getTemplateName()
+                        );
                     }
                     $content .= '</pre>';
                 }
@@ -193,9 +202,13 @@ class ControllerFrontSendResponseBefore
                     $content .= '<pre>';
                     $content .= sprintf("%s\n--------------------\n", __('Uncacheable Blocks'));
                     foreach ($uncacheableBlocks as $block) {
-                        $content .= sprintf("%s: %s: %s: %s\n", $block->getLayoutName(),
-                            $this->cache->isCached() ? 'FPC' : $block->getDuration(), $block->getClassName(),
-                            $block->getTemplateName());
+                        $content .= sprintf(
+                            "%s: %s: %s: %s\n",
+                            $block->getLayoutName(),
+                            $this->cache->isCached() ? 'FPC' : $block->getDuration(),
+                            $block->getClassName(),
+                            $block->getTemplateName()
+                        );
                     }
                     $content .= '</pre>';
                 }
@@ -208,15 +221,18 @@ class ControllerFrontSendResponseBefore
                     $content .= '<pre>';
                     $content .= sprintf("%s\n--------------------\n", __('Default Blocks'));
                     foreach ($defaultBlocks as $block) {
-                        $content .= sprintf("%s: %s: %s: %s\n", $block->getLayoutName(),
-                            $this->cache->isCached() ? 'FPC' : $block->getDuration(), $block->getClassName(),
-                            $block->getTemplateName());
+                        $content .= sprintf(
+                            "%s: %s: %s: %s\n",
+                            $block->getLayoutName(),
+                            $this->cache->isCached() ? 'FPC' : $block->getDuration(),
+                            $block->getClassName(),
+                            $block->getTemplateName()
+                        );
                     }
                     $content .= '</pre>';
                 }
             }
 
-            /** @noinspection PhpUndefinedMethodInspection */
             $response->setContent($content);
         }
     }

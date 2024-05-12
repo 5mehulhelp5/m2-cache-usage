@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\CacheUsage\Observer;
 
 use Magento\Framework\App\Cache\StateInterface;
@@ -12,7 +14,7 @@ use Infrangible\Core\Helper\Stores;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class ViewBlockAbstractToHtmlAfter
@@ -61,38 +63,36 @@ class ViewBlockAbstractToHtmlAfter
 
             $cacheBlock = $this->cache->getBlock($blockName);
 
-            if ($cacheBlock) {
-                $cacheBlock->setFinished(microtime(true));
+            $cacheBlock->setFinished(microtime(true));
 
-                $borderClass = null;
+            $borderClass = null;
 
-                if ($cacheBlock->isUncacheable() &&
-                    $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_uncacheable', false)) {
-                    $borderClass = 'block-uncacheable';
-                } else if ($cacheBlock->isCached() &&
-                    $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_cached', false)) {
-                    $borderClass = 'block-cached';
-                } else if ($cacheBlock->isUncached() &&
-                    $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_uncached', false)) {
-                    $borderClass = 'block-uncached';
-                } else if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_default', false)) {
-                    $borderClass = 'block-default';
-                }
+            if ($cacheBlock->isUncacheable() &&
+                $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_uncacheable')) {
+                $borderClass = 'block-uncacheable';
+            } else if ($cacheBlock->isCached() &&
+                $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_cached')) {
+                $borderClass = 'block-cached';
+            } else if ($cacheBlock->isUncached() &&
+                $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_uncached')) {
+                $borderClass = 'block-uncached';
+            } else if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_default')) {
+                $borderClass = 'block-default';
+            }
 
-                if ($borderClass) {
-                    $html = sprintf('
+            if ($borderClass) {
+                $html = sprintf('
 <div class="block-info %s">
-    <div class="block-info-details">
-        <a href="#" class="block-info-details-icon">
-            <!--suppress HtmlRequiredAltAttribute, RequiredAttributes -->
-            <img>
-        </a>
-        <span class="block-info-details-content">Layout: %s<br/>Class: %s<br/>Template: %s</span>
-    </div>
-    %s
+<div class="block-info-details">
+    <a href="#" class="block-info-details-icon">
+        <!--suppress HtmlRequiredAltAttribute, RequiredAttributes -->
+        <img>
+    </a>
+    <span class="block-info-details-content">Layout: %s<br/>Class: %s<br/>Template: %s</span>
+</div>
+%s
 </div>', $borderClass, $cacheBlock->getLayoutName(), $cacheBlock->getClassName(), $cacheBlock->getTemplateName(),
-                        $html);
-                }
+                    $html);
             }
 
             $transport->setData('html', $html);
