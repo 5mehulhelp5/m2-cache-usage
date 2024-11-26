@@ -11,14 +11,8 @@ use Infrangible\CacheUsage\Model\ResourceModel\FullPageCache\Collection;
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class Reduce
-    extends Clear
+class Reduce extends Clear
 {
-    /**
-     * @param Collection $fullPageCacheCollection
-     *
-     * @return void
-     */
     protected function prepareFullPageCacheCollection(Collection $fullPageCacheCollection): void
     {
         parent::prepareFullPageCacheCollection($fullPageCacheCollection);
@@ -26,14 +20,9 @@ class Reduce
         $fullPageCacheCollection->addCreatedAtLimit(30);
     }
 
-    /**
-     * @param \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\Collection $blockCacheCollection
-     *
-     * @return void
-     */
     protected function prepareBlockCacheCollection(
-        \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\Collection $blockCacheCollection): void
-    {
+        \Infrangible\CacheUsage\Model\ResourceModel\BlockCache\Collection $blockCacheCollection
+    ): void {
         parent::prepareBlockCacheCollection($blockCacheCollection);
 
         $blockCacheCollection->addCreatedAtLimit(30);
