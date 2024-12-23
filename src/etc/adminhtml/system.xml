@@ -74,6 +74,14 @@
                     </depends>
                 </field>
             </group>
+            <group id="layout" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Layout</label>
+                <field id="show_summary" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Summary</label>
+                    <comment>Display a summary of layout handles.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
         </section>
         <section id="task_cache_usage_clear" translate="label" type="text" sortOrder="990" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Clear Cache Usage</label>

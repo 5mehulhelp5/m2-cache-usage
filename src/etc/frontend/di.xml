@@ -15,4 +15,7 @@
     <type name="Magento\Framework\View\Layout">
         <plugin name="infrangible_cache_usage" type="Infrangible\CacheUsage\Plugin\Framework\View\Layout"/>
     </type>
+    <type name="Magento\Framework\View\Result\Page">
+        <plugin name="infrangible_cache_usage" type="Infrangible\CacheUsage\Plugin\Framework\View\Result\Page"/>
+    </type>
 </config>

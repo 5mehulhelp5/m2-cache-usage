@@ -39,14 +39,6 @@ class ControllerFrontSendResponseBefore
     /** @var \Infrangible\CacheUsage\Model\ResourceModel\BlockCacheFactory */
     protected $blockCacheResourceFactory;
 
-    /**
-     * @param Stores                                                           $storeHelper
-     * @param Cache                                                            $cache
-     * @param FullPageCacheFactory                                             $fullPageCacheFactory
-     * @param \Infrangible\CacheUsage\Model\ResourceModel\FullPageCacheFactory $fullPageCacheResourceFactory
-     * @param BlockCacheFactory                                                $blockCacheFactory
-     * @param \Infrangible\CacheUsage\Model\ResourceModel\BlockCacheFactory    $blockCacheResourceFactory
-     */
     public function __construct(
         Stores $storeHelper,
         Cache $cache,
@@ -64,12 +56,10 @@ class ControllerFrontSendResponseBefore
         $this->blockCacheResourceFactory = $blockCacheResourceFactory;
     }
 
-    /**
-     * @param Observer $observer
-     *
+    /***
      * @throws AlreadyExistsException
      */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
         /** @var \Magento\Framework\App\Request\Http $request */
         $request = $observer->getEvent()->getData('request');
@@ -141,7 +131,7 @@ class ControllerFrontSendResponseBefore
                 && $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/fpc/show_summary')) {
 
                 $content .= '<pre>';
-                $content .= sprintf("%s\n---------------\n", __('Full Page Cache'));
+                $content .= sprintf("%s\n--------------------\n", __('Full Page Cache'));
                 $content .= sprintf("Route: %s\n", $this->cache->getRouteName());
                 $content .= sprintf("Controller: %s\n", $this->cache->getControllerName());
                 $content .= sprintf("Action: %s\n", $this->cache->getActionName());
