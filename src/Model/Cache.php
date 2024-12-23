@@ -47,113 +47,71 @@ class Cache
     /** @var float */
     private $finished = 0;
 
-    /**
-     * @return string|null
-     */
     public function getRouteName(): ?string
     {
         return $this->routeName;
     }
 
-    /**
-     * @param string|null $routeName
-     */
     public function setRouteName(?string $routeName): void
     {
         $this->routeName = $routeName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getControllerName(): ?string
     {
         return $this->controllerName;
     }
 
-    /**
-     * @param string|null $controllerName
-     */
     public function setControllerName(?string $controllerName): void
     {
         $this->controllerName = $controllerName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getActionName(): ?string
     {
         return $this->actionName;
     }
 
-    /**
-     * @param string|null $actionName
-     */
     public function setActionName(?string $actionName): void
     {
         $this->actionName = $actionName;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPathParameters(): ?string
     {
         return $this->pathParameters;
     }
 
-    /**
-     * @param string|null $pathParameters
-     */
     public function setPathParameters(?string $pathParameters): void
     {
         $this->pathParameters = $pathParameters;
     }
 
-    /**
-     * @return string|null
-     */
     public function getQueryParameters(): ?string
     {
         return $this->queryParameters;
     }
 
-    /**
-     * @param string|null $queryParameters
-     */
     public function setQueryParameters(?string $queryParameters): void
     {
         $this->queryParameters = $queryParameters;
     }
 
-    /**
-     * @return bool
-     */
     public function isCacheable(): bool
     {
         return $this->cacheable;
     }
 
-    /**
-     * @param bool $cacheable
-     */
     public function setCacheable(bool $cacheable): void
     {
         $this->cacheable = $cacheable;
     }
 
-    /**
-     * @return bool
-     */
     public function isCached(): bool
     {
         return $this->cached;
     }
 
-    /**
-     * @param bool $cached
-     */
     public function setCached(bool $cached): void
     {
         $this->cached = $cached;
@@ -175,9 +133,6 @@ class Cache
         $this->blocks = $blocks;
     }
 
-    /**
-     * @param array $blocks
-     */
     public function setBlocksData(array $blocks): void
     {
         foreach ($blocks as $blockName => $blockData) {
@@ -275,14 +230,6 @@ class Cache
         return $blocks;
     }
 
-    /**
-     * @param LayoutInterface $layout
-     * @param string          $name
-     * @param string          $className
-     * @param string          $templateName
-     *
-     * @return Block
-     */
     public function addBlockData(
         LayoutInterface $layout,
         string $name,
@@ -301,9 +248,6 @@ class Cache
     }
 
     /**
-     * @param AbstractBlock $block
-     *
-     * @return Block
      * @throws LocalizedException
      */
     public function addBlock(AbstractBlock $block): Block
@@ -327,11 +271,6 @@ class Cache
         return $this->addBlockData($block->getLayout(), $blockName, get_class($block), $templateName);
     }
 
-    /**
-     * @param AbstractBlock $block
-     *
-     * @return string
-     */
     public function generateBlockName(AbstractBlock $block): string
     {
         $data = [];
@@ -346,9 +285,6 @@ class Cache
     }
 
     /**
-     * @param AbstractBlock $block
-     *
-     * @return Block
      * @throws LocalizedException
      */
     public function addUncacheableBlock(AbstractBlock $block): Block
@@ -361,9 +297,6 @@ class Cache
     }
 
     /**
-     * @param AbstractBlock $block
-     *
-     * @return Block
      * @throws LocalizedException
      */
     public function addCachedBlock(AbstractBlock $block): Block
@@ -376,9 +309,6 @@ class Cache
     }
 
     /**
-     * @param AbstractBlock $block
-     *
-     * @return Block
      * @throws LocalizedException
      */
     public function addUncachedBlock(AbstractBlock $block): Block
@@ -390,11 +320,6 @@ class Cache
         return $cacheBlock;
     }
 
-    /**
-     * @param string $blockName
-     *
-     * @return Block
-     */
     public function getBlock(string $blockName): Block
     {
         if (array_key_exists($blockName, $this->blocks)) {
@@ -404,12 +329,6 @@ class Cache
         return new Block();
     }
 
-    /**
-     * @param LayoutInterface $layout
-     * @param string          $nameInLayout
-     *
-     * @return string
-     */
     protected function getLayoutName(LayoutInterface $layout, string $nameInLayout): string
     {
         $parentName = $layout->getParentName($nameInLayout);
@@ -421,41 +340,26 @@ class Cache
         return sprintf('%s/%s', $this->getLayoutName($layout, $parentName), $nameInLayout);
     }
 
-    /**
-     * @return float
-     */
     public function getStarted(): float
     {
         return $this->started;
     }
 
-    /**
-     * @param float $started
-     */
     public function setStarted(float $started): void
     {
         $this->started = $started;
     }
 
-    /**
-     * @return float
-     */
     public function getFinished(): float
     {
         return $this->finished;
     }
 
-    /**
-     * @param float $finished
-     */
     public function setFinished(float $finished): void
     {
         $this->finished = $finished;
     }
 
-    /**
-     * @return float
-     */
     public function getDuration(): float
     {
         return round(($this->getFinished() - $this->getStarted()) * 1000);
