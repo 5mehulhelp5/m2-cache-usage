@@ -29,7 +29,7 @@ class Page
     ): \Magento\Framework\View\Result\Page {
         $result = $proceed($response);
 
-        if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/layout/show_summary')) {
+        if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/layout/show_handles')) {
             $handles = $subject->getLayout()->getUpdate()->getHandles();
 
             $response->appendBody(
@@ -42,6 +42,23 @@ class Page
                         '<br />',
                         $handles
                     )
+                )
+            );
+        }
+
+        if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/layout/show_xml')) {
+            $dom = new \DOMDocument('1.0');
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput = true;
+            $dom->loadXML($subject->getLayout()->getUpdate()->getFileLayoutUpdatesXml()->asXML());
+
+            $response->appendBody(
+                sprintf(
+                    '<pre>%s%s--------------------%s%s</pre>',
+                    __('Layout XML'),
+                    PHP_EOL,
+                    PHP_EOL,
+                    htmlentities($dom->saveXML())
                 )
             );
         }
