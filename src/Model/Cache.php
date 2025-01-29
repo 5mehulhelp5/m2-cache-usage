@@ -138,27 +138,45 @@ class Cache
         foreach ($blocks as $blockName => $blockData) {
             $block = new Block();
 
-            if (array_key_exists('layout_name', $blockData)) {
+            if (array_key_exists(
+                'layout_name',
+                $blockData
+            )) {
                 $block->setLayoutName($blockData[ 'layout_name' ]);
             }
 
-            if (array_key_exists('class_name', $blockData)) {
+            if (array_key_exists(
+                'class_name',
+                $blockData
+            )) {
                 $block->setClassName($blockData[ 'class_name' ]);
             }
 
-            if (array_key_exists('template_name', $blockData)) {
+            if (array_key_exists(
+                'template_name',
+                $blockData
+            )) {
                 $block->setTemplateName($blockData[ 'template_name' ]);
             }
 
-            if (array_key_exists('uncacheable', $blockData)) {
+            if (array_key_exists(
+                'uncacheable',
+                $blockData
+            )) {
                 $block->setUncacheable($blockData[ 'uncacheable' ]);
             }
 
-            if (array_key_exists('cached', $blockData)) {
+            if (array_key_exists(
+                'cached',
+                $blockData
+            )) {
                 $block->setCached($blockData[ 'cached' ]);
             }
 
-            if (array_key_exists('uncached', $blockData)) {
+            if (array_key_exists(
+                'uncached',
+                $blockData
+            )) {
                 $block->setUncached($blockData[ 'uncached' ]);
             }
 
@@ -174,7 +192,7 @@ class Cache
         $blocks = [];
 
         foreach ($this->getBlocks() as $block) {
-            if ( ! $block->isUncacheable() && ! $block->isCached() && ! $block->isUncached()) {
+            if (! $block->isUncacheable() && ! $block->isCached() && ! $block->isUncached()) {
                 $blocks[ $block->getLayoutName() ] = $block;
             }
         }
@@ -234,11 +252,16 @@ class Cache
         LayoutInterface $layout,
         string $name,
         string $className,
-        string $templateName): Block
-    {
+        string $templateName
+    ): Block {
         $cacheBlock = $this->getBlock($name);
 
-        $cacheBlock->setLayoutName($this->getLayoutName($layout, $name));
+        $cacheBlock->setLayoutName(
+            $this->getLayoutName(
+                $layout,
+                $name
+            )
+        );
         $cacheBlock->setClassName($className);
         $cacheBlock->setTemplateName($templateName);
 
@@ -263,12 +286,21 @@ class Cache
         if ($block instanceof Template) {
             $template = $block->getTemplate();
 
-            if ( ! empty($template)) {
+            if (! empty($template)) {
                 $templateName = $block->getTemplateFile();
             }
         }
 
-        return $this->addBlockData($block->getLayout(), $blockName, get_class($block), $templateName);
+        if ($templateName === false) {
+            $templateName = '-';
+        }
+
+        return $this->addBlockData(
+            $block->getLayout(),
+            $blockName,
+            get_class($block),
+            $templateName
+        );
     }
 
     public function generateBlockName(AbstractBlock $block): string
@@ -322,7 +354,10 @@ class Cache
 
     public function getBlock(string $blockName): Block
     {
-        if (array_key_exists($blockName, $this->blocks)) {
+        if (array_key_exists(
+            $blockName,
+            $this->blocks
+        )) {
             return $this->blocks[ $blockName ];
         }
 
@@ -337,7 +372,14 @@ class Cache
             return $nameInLayout;
         }
 
-        return sprintf('%s/%s', $this->getLayoutName($layout, $parentName), $nameInLayout);
+        return sprintf(
+            '%s/%s',
+            $this->getLayoutName(
+                $layout,
+                $parentName
+            ),
+            $nameInLayout
+        );
     }
 
     public function getStarted(): float
