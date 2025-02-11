@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Infrangible\CacheUsage\Plugin\Framework\App;
 
-use Magento\Framework\App\ActionInterface;
+use Infrangible\CacheUsage\Model\Cache;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\App\Router\Base;
-use Infrangible\CacheUsage\Model\Cache;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class RouterInterface
@@ -22,25 +21,13 @@ class RouterInterface
     /** @var Http */
     protected $request;
 
-    /**
-     * @param Cache $cache
-     * @param Http  $request
-     */
     public function __construct(Cache $cache, Http $request)
     {
         $this->cache = $cache;
         $this->request = $request;
     }
 
-    /**
-     * @param \Magento\Framework\App\RouterInterface $subject
-     * @param ActionInterface|null                   $matched
-     *
-     * @return ActionInterface|null
-     */
-    public function afterMatch(
-        \Magento\Framework\App\RouterInterface $subject,
-        ?ActionInterface $matched): ?ActionInterface
+    public function afterMatch(\Magento\Framework\App\RouterInterface $subject, $matched)
     {
         if ($matched && $subject instanceof Base) {
             $this->cache->setRouteName($this->request->getRouteName());
