@@ -1,5 +1,7 @@
 /.idea/
-/.vagrant/
+/app/code/Magento/
+/app/etc/
 /generated/
+/pub/
 /var/
 /vendor/
