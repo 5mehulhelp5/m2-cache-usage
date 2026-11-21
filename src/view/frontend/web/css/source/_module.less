@@ -1,10 +1,19 @@
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 
-//noinspection LessUnresolvedVariable,LessUnresolvedMixin
+@cache-usage-icon__background-color: #555;
+@cache-usage-icon__color: #fff;
+@cache-usage-details__border-color: #aaa;
+@cache-usage-details__background-color: #fff;
+@cache-usage-details__color: #000;
+@cache-usage-uncacheable__color: #a00;
+@cache-usage-cached__color: #0a0;
+@cache-usage-uncached__color: #aa0;
+@cache-usage-default__color: #aaa;
+
 & when (@media-common = true) {
     .block-info {
         display: block !important;
@@ -13,24 +22,29 @@
             float: left;
 
             .block-info-details-icon {
-                img {
-                    margin: 2px;
-                    content: url(https://cdn.onlinewebfonts.com/svg/img_151567.png);
-                    width: 15px;
-                }
+                background-color: @cache-usage-icon__background-color;
+                border-radius: 50%;
+                color: @cache-usage-icon__color;
+                cursor: help;
+                display: inline-block;
+                font: italic bold 11px/15px serif;
+                height: 15px;
+                margin: 2px;
+                text-align: center;
+                width: 15px;
             }
 
             .block-info-details-content {
-                position: absolute;
-                margin-top: 2px;
-                border: #aaa 1px solid;
+                background-color: @cache-usage-details__background-color;
+                border: 1px solid @cache-usage-details__border-color;
                 border-radius: 5px;
+                color: @cache-usage-details__color;
+                margin-top: 2px;
                 padding: 5px;
-                background-color: #fff;
-                color: #000;
+                position: absolute;
+                visibility: hidden;
                 white-space: nowrap;
                 z-index: 9999;
-                visibility: hidden;
             }
         }
 
@@ -42,18 +56,18 @@
     }
 
     .block-uncacheable {
-        border: 1px solid #a00;
+        border: 1px solid @cache-usage-uncacheable__color;
     }
 
     .block-cached {
-        border: 1px solid #0a0;
+        border: 1px solid @cache-usage-cached__color;
     }
 
     .block-uncached {
-        border: 1px solid #aa0;
+        border: 1px solid @cache-usage-uncached__color;
     }
 
     .block-default {
-        border: 1px solid #aaa;
+        border: 1px solid @cache-usage-default__color;
     }
 }

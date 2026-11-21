@@ -2,53 +2,47 @@
 
 declare(strict_types=1);
 
-namespace Infrangible\CacheUsage\Observer;
-
-use Magento\Framework\App\Cache\StateInterface;
-use Magento\Framework\Event\Observer;
-use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\View\Element\AbstractBlock;
-use Infrangible\CacheUsage\Model\Cache;
-
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class ViewBlockAbstractToHtmlBefore
-    implements ObserverInterface
+
+namespace Infrangible\CacheUsage\Observer;
+
+use Infrangible\CacheUsage\Helper\Data;
+use Infrangible\CacheUsage\Model\Cache;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\View\Element\AbstractBlock;
+
+/**
+ * Adds every block before it is rendered and starts measuring its rendering. Whether the block is loaded from the
+ * block cache is known only afterwards (plugin of LockGuardedCacheLoader).
+ */
+class ViewBlockAbstractToHtmlBefore implements ObserverInterface
 {
-    /** @var StateInterface */
-    protected $cacheState;
-
-    /** @var Cache */
-    protected $cache;
-
     /**
-     * @param StateInterface $cacheState
-     * @param Cache          $cache
+     * @param Data $helper
+     * @param Cache $cache
      */
-    public function __construct(StateInterface $cacheState, Cache $cache)
+    public function __construct(protected Data $helper, protected Cache $cache)
     {
-        $this->cacheState = $cacheState;
-        $this->cache = $cache;
     }
 
     /**
+     * Adds the block and starts measuring its rendering.
+     *
      * @param Observer $observer
      *
-     * @throws LocalizedException
+     * @return void
      */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
-        /** @var AbstractBlock $block */
         $block = $observer->getEvent()->getData('block');
 
-        $cacheLifetime = $block->getDataUsingMethod('cache_lifetime');
-
-        if ($cacheLifetime === null || ! $this->cacheState->isEnabled(AbstractBlock::CACHE_GROUP)) {
-            $this->cache->addBlock($block);
+        if ($block instanceof AbstractBlock && $this->helper->isBlocksEnabled()) {
+            $this->cache->startBlock($block);
         }
     }
 }

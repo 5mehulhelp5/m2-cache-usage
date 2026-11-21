@@ -2,21 +2,26 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Controller\Adminhtml\Task;
 
 use Infrangible\Task\Controller\Adminhtml\Run;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Runs the task that removes the collected cache usage older than 30 days from the menu of the admin.
  */
-class Reduce
-    extends Run
+class Reduce extends Run
 {
     use \Infrangible\CacheUsage\Traits\Reduce;
 
     /**
+     * Returns the ACL resource that allows running the task.
+     *
      * @return string
      */
     protected function getTaskResourceId(): string

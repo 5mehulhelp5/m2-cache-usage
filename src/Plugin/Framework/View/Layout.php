@@ -2,71 +2,80 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Plugin\Framework\View;
 
+use Infrangible\CacheUsage\Helper\Data;
 use Infrangible\CacheUsage\Model\Cache;
 use Magento\Framework\View\Element\AbstractBlock;
-use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Layout\Element;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Records whether the page is cacheable, and the blocks that the layout declares as not cacheable, which make the
+ * whole page uncacheable.
  */
 class Layout
 {
-    /** @var Cache */
-    protected $cache;
-
-    public function __construct(Cache $cache)
+    /**
+     * @param Data $helper
+     * @param Cache $cache
+     */
+    public function __construct(protected Data $helper, protected Cache $cache)
     {
-        $this->cache = $cache;
     }
 
-    public function afterGenerateElements(\Magento\Framework\View\Layout $subject)
+    /**
+     * Records whether the page is cacheable and its blocks with cacheable="false".
+     *
+     * @param \Magento\Framework\View\Layout $subject
+     *
+     * @return void
+     */
+    public function afterGenerateElements(\Magento\Framework\View\Layout $subject): void
     {
+        if (! $this->helper->isCollecting()) {
+            return;
+        }
+
         if ($subject->isCacheable()) {
             $this->cache->setCacheable(true);
         }
 
-        $xml = $subject->getUpdate()->asSimplexml();
+        if (! $this->helper->isBlocksEnabled()) {
+            return;
+        }
 
-        $elements = $xml->xpath('//' . Element::TYPE_BLOCK . '[@cacheable="false"]');
+        $elements = $subject->getUpdate()->asSimplexml()->xpath(
+            sprintf('//%s[@cacheable="false"]', Element::TYPE_BLOCK)
+        );
 
-        if (count($elements)) {
-            /** @var Element $element */
-            foreach ($elements as $element) {
-                $blockName = $element->getBlockName();
-                $className = $element->getAttribute('class');
-
-                if ($className === null) {
-                    $className = AbstractBlock::class;
-                }
-
-                $templateName = '-';
-
-                if ($subject->isBlock($blockName)) {
-                    $block = $subject->getBlock($blockName);
-
-                    if ($block instanceof Template) {
-                        $template = $block->getTemplate();
-
-                        if (! empty($template)) {
-                            $templateName = $block->getTemplateFile();
-                        }
-                    }
-                }
-
-                $cacheBlock = $this->cache->addBlockData(
-                    $subject,
-                    $blockName,
-                    $className,
-                    $templateName
-                );
-
-                $cacheBlock->setUncacheable(true);
+        foreach ($elements as $element) {
+            if (! $element instanceof Element) {
+                continue;
             }
+
+            $blockName = $element->getBlockName();
+
+            if (! is_string($blockName) || $blockName === '') {
+                continue;
+            }
+
+            $className = $element->getAttribute('class');
+            $block = $subject->getBlock($blockName);
+
+            $cacheBlock = $this->cache->addBlockData(
+                $subject,
+                $blockName,
+                is_string($className) && $className !== '' ? $className : AbstractBlock::class,
+                $block instanceof AbstractBlock ? $this->cache->getTemplateName($block) : '-'
+            );
+
+            $cacheBlock->setUncacheable(true);
         }
     }
 }

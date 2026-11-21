@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="cache_usage_fpc" resource="default" engine="innodb" comment="Full Page Cache Usage of Requests">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="varchar" name="route" length="255" nullable="false" default="" comment="Route"/>
+        <column xsi:type="varchar" name="controller" length="255" nullable="false" default="" comment="Controller"/>
+        <column xsi:type="varchar" name="action" length="255" nullable="false" default="" comment="Action"/>
+        <column xsi:type="varchar" name="path" length="255" nullable="false" default="" comment="Path Parameters"/>
+        <column xsi:type="text" name="query" nullable="false" comment="Query Parameters"/>
+        <column xsi:type="smallint" name="cacheable" padding="5" unsigned="true" nullable="false" default="0" comment="Cacheable"/>
+        <column xsi:type="smallint" name="cached" padding="5" unsigned="true" nullable="false" default="0" comment="Cached"/>
+        <column xsi:type="int" name="duration" padding="10" unsigned="true" nullable="true" comment="Duration in Milliseconds"/>
+        <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" comment="Creation Time"/>
+        <column xsi:type="datetime" name="updated_at" on_update="false" nullable="false" comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="CACHE_USAGE_FPC_ROUTE_CONTROLLER_ACTION" indexType="btree">
+            <column name="route"/>
+            <column name="controller"/>
+            <column name="action"/>
+        </index>
+        <index referenceId="CACHE_USAGE_FPC_CACHEABLE_CACHED" indexType="btree">
+            <column name="cacheable"/>
+            <column name="cached"/>
+        </index>
+        <index referenceId="CACHE_USAGE_FPC_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+    <table name="cache_usage_block" resource="default" engine="innodb" comment="Blocks Rendered by Requests">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="varchar" name="route" length="255" nullable="false" default="" comment="Route"/>
+        <column xsi:type="varchar" name="controller" length="255" nullable="false" default="" comment="Controller"/>
+        <column xsi:type="varchar" name="action" length="255" nullable="false" default="" comment="Action"/>
+        <column xsi:type="varchar" name="path" length="255" nullable="false" default="" comment="Path Parameters"/>
+        <column xsi:type="text" name="query" nullable="false" comment="Query Parameters"/>
+        <column xsi:type="varchar" name="layout_name" length="1000" nullable="false" default="" comment="Path in the Layout"/>
+        <column xsi:type="varchar" name="class_name" length="255" nullable="false" default="" comment="Class Name"/>
+        <column xsi:type="varchar" name="template_name" length="1000" nullable="false" default="" comment="Template File"/>
+        <column xsi:type="smallint" name="cacheable" padding="5" unsigned="true" nullable="false" default="2" comment="Cacheable"/>
+        <column xsi:type="smallint" name="cached" padding="5" unsigned="true" nullable="false" default="0" comment="Cached"/>
+        <column xsi:type="int" name="duration" padding="10" unsigned="true" nullable="true" comment="Duration in Milliseconds"/>
+        <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" comment="Creation Time"/>
+        <column xsi:type="datetime" name="updated_at" on_update="false" nullable="false" comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_ACTION" indexType="btree">
+            <column name="route"/>
+            <column name="controller"/>
+            <column name="action"/>
+        </index>
+        <index referenceId="CACHE_USAGE_BLOCK_CACHEABLE_CACHED" indexType="btree">
+            <column name="cacheable"/>
+            <column name="cached"/>
+        </index>
+        <index referenceId="CACHE_USAGE_BLOCK_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+</schema>

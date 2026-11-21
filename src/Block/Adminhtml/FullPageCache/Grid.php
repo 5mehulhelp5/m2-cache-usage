@@ -2,113 +2,51 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Block\Adminhtml\FullPageCache;
 
 use Exception;
 use Infrangible\BackendWidget\Block\Grid\GroupBy;
-use Magento\Framework\Data\Collection\AbstractDb;
-use Zend_Db_Expr;
+use Infrangible\CacheUsage\Block\Adminhtml\AverageDuration;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Grid of the usage of the full page cache by requests, also grouped.
  */
 class Grid extends GroupBy
 {
-    protected function prepareCollection(AbstractDb $collection): void
-    {
-    }
-
-    protected function followUpCollection(AbstractDb $collection): void
-    {
-        parent::followUpCollection($collection);
-
-        $groupBy = $this->getParam('group_by');
-
-        if (! $this->variables->isEmpty($groupBy)) {
-            $select = $collection->getSelect();
-
-            $select->columns([new Zend_Db_Expr('ROUND(AVG(duration), 0) AS average_duration')]);
-        }
-    }
+    use AverageDuration;
 
     /**
+     * Adds the columns.
+     *
+     * @return void
      * @throws Exception
      */
     protected function prepareFields(): void
     {
-        $this->addTextColumn(
-            'route',
-            __('Route')->render()
-        );
-        $this->addTextColumn(
-            'controller',
-            __('Controller')->render()
-        );
-        $this->addTextColumn(
-            'action',
-            __('Action')->render()
-        );
-        $this->addTextColumn(
-            'path',
-            __('Path')->render()
-        );
-        $this->addTextColumn(
-            'query',
-            __('Query')->render()
-        );
-        $this->addYesNoColumn(
-            'cacheable',
-            __('Cacheable')->render()
-        );
-        $this->addYesNoColumn(
-            'cached',
-            __('Cached')->render()
-        );
-        $this->addNumberColumn(
-            'duration',
-            __('Duration')->render()
-        );
-        $this->addDatetimeColumn(
-            'created_at',
-            __('Date')->render()
-        );
+        $this->addTextColumn('route', __('Route')->render());
+        $this->addTextColumn('controller', __('Controller')->render());
+        $this->addTextColumn('action', __('Action')->render());
+        $this->addTextColumn('path', __('Path Parameters')->render());
+        $this->addTextColumn('query', __('Query Parameters')->render());
+        $this->addYesNoColumn('cacheable', __('Cacheable')->render());
+        $this->addYesNoColumn('cached', __('Cached')->render());
+        $this->addNumberColumn('duration', __('Duration (ms)')->render());
+        $this->addDatetimeColumn('created_at', __('Date')->render());
     }
 
     /**
+     * Returns the fields that are hidden by default.
+     *
      * @return string[]
      */
     protected function getHiddenFieldNames(): array
     {
         return ['query'];
-    }
-
-    public function getNotGroupableFieldNames(): array
-    {
-        return ['duration', 'created_at', 'average_duration'];
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function followUpFields(): void
-    {
-        parent::followUpFields();
-
-        $groupBy = $this->getParam('group_by');
-
-        if (! $this->variables->isEmpty($groupBy)) {
-            $this->addColumn(
-                'average_duration',
-                [
-                    'header'           => __('Average'),
-                    'index'            => 'average_duration',
-                    'type'             => 'number',
-                    'column_css_class' => 'data-grid-td',
-                    'filter'           => false
-                ]
-            );
-        }
     }
 }

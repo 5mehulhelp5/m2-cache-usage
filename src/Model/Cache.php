@@ -2,123 +2,277 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Model;
 
+use Infrangible\CacheUsage\Model\Cache\Block;
+use Infrangible\CacheUsage\Model\Cache\Timing;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\LayoutInterface;
-use Infrangible\CacheUsage\Model\Cache\Block;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * The cache usage of the current request: the matched route, whether the page is cacheable and was cached, and the
+ * rendered blocks. Shared by the plugins and observers of the request.
  */
 class Cache
 {
-    /** @var string */
-    private $routeName;
+    use Timing;
 
-    /** @var string */
-    private $controllerName;
+    /** @var string|null */
+    private ?string $routeName = null;
 
-    /** @var string */
-    private $actionName;
+    /** @var string|null */
+    private ?string $controllerName = null;
 
-    /** @var string */
-    private $pathParameters;
+    /** @var string|null */
+    private ?string $actionName = null;
 
-    /** @var string */
-    private $queryParameters;
+    /** @var string|null */
+    private ?string $pathParameters = null;
+
+    /** @var string|null */
+    private ?string $queryParameters = null;
 
     /** @var bool */
-    private $cacheable = false;
+    private bool $cacheable = false;
 
     /** @var bool */
-    private $cached = false;
+    private bool $cached = false;
 
-    /** @var Block[] */
-    private $blocks = [];
+    /** @var array<string, Block> blocks by name in the layout */
+    private array $blocks = [];
 
-    /** @var float */
-    private $started = 0;
+    /** @var string|null the running operation of the page cache kernel, "load" or "process" */
+    private ?string $pageCacheOperation = null;
 
-    /** @var float */
-    private $finished = 0;
+    /**
+     * Returns the page cache operation.
+     *
+     * @return string|null
+     */
+    public function getPageCacheOperation(): ?string
+    {
+        return $this->pageCacheOperation;
+    }
 
+    /**
+     * Sets the page cache operation.
+     *
+     * @param string|null $pageCacheOperation
+     *
+     * @return void
+     */
+    public function setPageCacheOperation(?string $pageCacheOperation): void
+    {
+        $this->pageCacheOperation = $pageCacheOperation;
+    }
+
+    /**
+     * Returns the data of the request that the full page cache stores with the page.
+     *
+     * @return array<string, mixed>
+     */
+    public function getPageCacheData(): array
+    {
+        return [
+            'route'            => $this->getRouteName(),
+            'controller'       => $this->getControllerName(),
+            'action'           => $this->getActionName(),
+            'path_parameters'  => $this->getPathParameters(),
+            'query_parameters' => $this->getQueryParameters(),
+            'blocks'           => array_map(
+                static fn(Block $block): array => $block->jsonSerialize(),
+                $this->getBlocks()
+            )
+        ];
+    }
+
+    /**
+     * Sets the data of the request that the full page cache stored with the page.
+     *
+     * @param mixed $data
+     *
+     * @return void
+     */
+    public function setPageCacheData(mixed $data): void
+    {
+        if (! is_array($data)) {
+            return;
+        }
+
+        $this->setRouteName($this->getStringValue($data, 'route'));
+        $this->setControllerName($this->getStringValue($data, 'controller'));
+        $this->setActionName($this->getStringValue($data, 'action'));
+        $this->setPathParameters($this->getStringValue($data, 'path_parameters'));
+        $this->setQueryParameters($this->getStringValue($data, 'query_parameters'));
+        $this->setBlocksData($data[ 'blocks' ] ?? null);
+    }
+
+    /**
+     * Returns the route name.
+     *
+     * @return string|null
+     */
     public function getRouteName(): ?string
     {
         return $this->routeName;
     }
 
+    /**
+     * Sets the route name.
+     *
+     * @param string|null $routeName
+     *
+     * @return void
+     */
     public function setRouteName(?string $routeName): void
     {
         $this->routeName = $routeName;
     }
 
+    /**
+     * Returns the controller name.
+     *
+     * @return string|null
+     */
     public function getControllerName(): ?string
     {
         return $this->controllerName;
     }
 
+    /**
+     * Sets the controller name.
+     *
+     * @param string|null $controllerName
+     *
+     * @return void
+     */
     public function setControllerName(?string $controllerName): void
     {
         $this->controllerName = $controllerName;
     }
 
+    /**
+     * Returns the action name.
+     *
+     * @return string|null
+     */
     public function getActionName(): ?string
     {
         return $this->actionName;
     }
 
+    /**
+     * Sets the action name.
+     *
+     * @param string|null $actionName
+     *
+     * @return void
+     */
     public function setActionName(?string $actionName): void
     {
         $this->actionName = $actionName;
     }
 
+    /**
+     * Returns the path parameters.
+     *
+     * @return string|null
+     */
     public function getPathParameters(): ?string
     {
         return $this->pathParameters;
     }
 
+    /**
+     * Sets the path parameters.
+     *
+     * @param string|null $pathParameters
+     *
+     * @return void
+     */
     public function setPathParameters(?string $pathParameters): void
     {
         $this->pathParameters = $pathParameters;
     }
 
+    /**
+     * Returns the query parameters.
+     *
+     * @return string|null
+     */
     public function getQueryParameters(): ?string
     {
         return $this->queryParameters;
     }
 
+    /**
+     * Sets the query parameters.
+     *
+     * @param string|null $queryParameters
+     *
+     * @return void
+     */
     public function setQueryParameters(?string $queryParameters): void
     {
         $this->queryParameters = $queryParameters;
     }
 
+    /**
+     * Checks if the request is cacheable.
+     *
+     * @return bool
+     */
     public function isCacheable(): bool
     {
         return $this->cacheable;
     }
 
+    /**
+     * Sets the cacheable.
+     *
+     * @param bool $cacheable
+     *
+     * @return void
+     */
     public function setCacheable(bool $cacheable): void
     {
         $this->cacheable = $cacheable;
     }
 
+    /**
+     * Checks if the request is cached.
+     *
+     * @return bool
+     */
     public function isCached(): bool
     {
         return $this->cached;
     }
 
+    /**
+     * Sets the cached.
+     *
+     * @param bool $cached
+     *
+     * @return void
+     */
     public function setCached(bool $cached): void
     {
         $this->cached = $cached;
     }
 
     /**
-     * @return Block[]
+     * Returns the blocks.
+     *
+     * @return array<string, Block>
      */
     public function getBlocks(): array
     {
@@ -126,142 +280,91 @@ class Cache
     }
 
     /**
-     * @param Block[] $blocks
+     * Sets the blocks from the data that the full page cache stored with the page.
+     *
+     * @param mixed $blocksData
+     *
+     * @return void
      */
-    public function setBlocks(array $blocks): void
+    public function setBlocksData(mixed $blocksData): void
     {
-        $this->blocks = $blocks;
-    }
+        if (! is_array($blocksData)) {
+            return;
+        }
 
-    public function setBlocksData(array $blocks): void
-    {
-        foreach ($blocks as $blockName => $blockData) {
+        foreach ($blocksData as $blockName => $blockData) {
+            if (! is_array($blockData)) {
+                continue;
+            }
+
             $block = new Block();
 
-            if (array_key_exists(
-                'layout_name',
-                $blockData
-            )) {
-                $block->setLayoutName($blockData[ 'layout_name' ]);
-            }
+            $block->setLayoutName($this->getStringValue($blockData, 'layout_name'));
+            $block->setClassName($this->getStringValue($blockData, 'class_name'));
+            $block->setTemplateName($this->getStringValue($blockData, 'template_name'));
+            $block->setUncacheable(($blockData[ 'uncacheable' ] ?? false) === true);
+            $block->setCached(($blockData[ 'cached' ] ?? false) === true);
+            $block->setUncached(($blockData[ 'uncached' ] ?? false) === true);
 
-            if (array_key_exists(
-                'class_name',
-                $blockData
-            )) {
-                $block->setClassName($blockData[ 'class_name' ]);
-            }
-
-            if (array_key_exists(
-                'template_name',
-                $blockData
-            )) {
-                $block->setTemplateName($blockData[ 'template_name' ]);
-            }
-
-            if (array_key_exists(
-                'uncacheable',
-                $blockData
-            )) {
-                $block->setUncacheable($blockData[ 'uncacheable' ]);
-            }
-
-            if (array_key_exists(
-                'cached',
-                $blockData
-            )) {
-                $block->setCached($blockData[ 'cached' ]);
-            }
-
-            if (array_key_exists(
-                'uncached',
-                $blockData
-            )) {
-                $block->setUncached($blockData[ 'uncached' ]);
-            }
-
-            $this->blocks[ $blockName ] = $block;
+            $this->blocks[ (string)$blockName ] = $block;
         }
     }
 
     /**
-     * @return Block[]
+     * Returns the value of the key if it is a string, else null.
+     *
+     * @param array $data
+     * @phpstan-param array<int|string, mixed> $data
+     * @param string $key
+     *
+     * @return string|null
      */
-    public function getDefaultBlocks(): array
+    private function getStringValue(array $data, string $key): ?string
     {
-        $blocks = [];
-
-        foreach ($this->getBlocks() as $block) {
-            if (! $block->isUncacheable() && ! $block->isCached() && ! $block->isUncached()) {
-                $blocks[ $block->getLayoutName() ] = $block;
-            }
-        }
-
-        return $blocks;
+        return isset($data[ $key ]) && is_string($data[ $key ]) ? $data[ $key ] : null;
     }
 
     /**
-     * @return Block[]
+     * Returns the blocks with the cache state, sorted by their path in the layout.
+     *
+     * @param string $state one of the STATE constants of the block
+     *
+     * @return array<string, Block> blocks by path in the layout
      */
-    public function getUncacheableBlocks(): array
+    public function getBlocksByState(string $state): array
     {
         $blocks = [];
 
         foreach ($this->getBlocks() as $blockName => $block) {
-            if ($block->isUncacheable()) {
-                $blocks[ $blockName ] = $block;
+            if ($block->getState() === $state) {
+                $blocks[ $block->getLayoutName() ?? $blockName ] = $block;
             }
         }
+
+        ksort($blocks);
 
         return $blocks;
     }
 
     /**
-     * @return Block[]
+     * Adds the block or updates its names, and returns it.
+     *
+     * @param LayoutInterface|null $layout
+     * @param string $name
+     * @param string $className
+     * @param string $templateName
+     *
+     * @return Block
      */
-    public function getCachedBlocks(): array
-    {
-        $blocks = [];
-
-        foreach ($this->getBlocks() as $block) {
-            if ($block->isCached()) {
-                $blocks[ $block->getLayoutName() ] = $block;
-            }
-        }
-
-        return $blocks;
-    }
-
-    /**
-     * @return Block[]
-     */
-    public function getUncachedBlocks(): array
-    {
-        $blocks = [];
-
-        foreach ($this->getBlocks() as $block) {
-            if ($block->isUncached()) {
-                $blocks[ $block->getLayoutName() ] = $block;
-            }
-        }
-
-        return $blocks;
-    }
-
     public function addBlockData(
-        LayoutInterface $layout,
+        ?LayoutInterface $layout,
         string $name,
         string $className,
         string $templateName
     ): Block {
-        $cacheBlock = $this->getBlock($name);
+        $cacheBlock = $this->getBlock($name) ?? new Block();
 
-        $cacheBlock->setLayoutName(
-            $this->getLayoutName(
-                $layout,
-                $name
-            )
-        );
+        $cacheBlock->setLayoutName($this->getLayoutName($layout, $name));
         $cacheBlock->setClassName($className);
         $cacheBlock->setTemplateName($templateName);
 
@@ -271,139 +374,127 @@ class Cache
     }
 
     /**
-     * @throws LocalizedException
+     * Adds the block or updates its names, and returns it.
+     *
+     * @param AbstractBlock $block
+     *
+     * @return Block
      */
     public function addBlock(AbstractBlock $block): Block
     {
-        $blockName = $block->getNameInLayout();
-
-        if ($blockName === null) {
-            $blockName = $this->generateBlockName($block);
-        }
-
-        $templateName = '-';
-
-        if ($block instanceof Template) {
-            $template = $block->getTemplate();
-
-            if (! empty($template)) {
-                $templateName = $block->getTemplateFile();
-            }
-        }
-
-        if ($templateName === false) {
-            $templateName = '-';
+        try {
+            $layout = $block->getLayout();
+        } catch (LocalizedException) {
+            // a block without layout has no parents
+            $layout = null;
         }
 
         return $this->addBlockData(
-            $block->getLayout(),
-            $blockName,
-            get_class($block),
-            $templateName
+            $layout,
+            $this->getBlockName($block),
+            $block::class,
+            $this->getTemplateName($block)
         );
     }
 
+    /**
+     * Adds the block, before it is rendered, and starts measuring its rendering.
+     *
+     * @param AbstractBlock $block
+     *
+     * @return Block
+     */
+    public function startBlock(AbstractBlock $block): Block
+    {
+        $cacheBlock = $this->addBlock($block);
+
+        $cacheBlock->setStarted(microtime(true));
+        $cacheBlock->setFinished(null);
+
+        return $cacheBlock;
+    }
+
+    /**
+     * Returns the template file of the block, or "-" for blocks without template.
+     *
+     * @param AbstractBlock $block
+     *
+     * @return string
+     */
+    public function getTemplateName(AbstractBlock $block): string
+    {
+        if (! $block instanceof Template || $block->getTemplate() === '') {
+            return '-';
+        }
+
+        $templateFile = $block->getTemplateFile();
+
+        return is_string($templateFile) && $templateFile !== '' ? $templateFile : '-';
+    }
+
+    /**
+     * Returns the name of the block in the layout, or a name from its data for blocks without name.
+     *
+     * @param AbstractBlock $block
+     *
+     * @return string
+     */
+    public function getBlockName(AbstractBlock $block): string
+    {
+        $blockName = $block->getNameInLayout();
+
+        return is_string($blockName) && $blockName !== '' ? $blockName : $this->generateBlockName($block);
+    }
+
+    /**
+     * Returns a name for a block without name in the layout, from its class and its scalar data.
+     *
+     * @param AbstractBlock $block
+     *
+     * @return string
+     */
     public function generateBlockName(AbstractBlock $block): string
     {
-        $data = [];
+        $blockData = $block->getData();
+        $data = is_array($blockData) ? array_filter($blockData, 'is_scalar') : [];
 
-        foreach ($block->getData() as $key => $value) {
-            if (is_scalar($value)) {
-                $data[ $key ] = $value;
-            }
-        }
+        ksort($data);
 
-        return 'anonymous/' . md5(json_encode($data));
+        return 'anonymous/' . hash('sha256', $block::class . (json_encode($data) ?: ''));
     }
 
     /**
-     * @throws LocalizedException
+     * Returns the block with the name in the layout, or null.
+     *
+     * @param string $blockName
+     *
+     * @return Block|null
      */
-    public function addUncacheableBlock(AbstractBlock $block): Block
+    public function getBlock(string $blockName): ?Block
     {
-        $cacheBlock = $this->addBlock($block);
-
-        $cacheBlock->setUncacheable(true);
-
-        return $cacheBlock;
+        return $this->blocks[ $blockName ] ?? null;
     }
 
     /**
-     * @throws LocalizedException
+     * Returns the path of the block in the layout: the names of its parents and its name, separated by "/".
+     *
+     * @param LayoutInterface|null $layout
+     * @param string $nameInLayout
+     *
+     * @return string
      */
-    public function addCachedBlock(AbstractBlock $block): Block
+    protected function getLayoutName(?LayoutInterface $layout, string $nameInLayout): string
     {
-        $cacheBlock = $this->addBlock($block);
+        $names = [$nameInLayout];
+        $parentName = $layout?->getParentName($nameInLayout);
 
-        $cacheBlock->setCached(true);
+        // the names are collected iteratively, a faulty layout with a cycle must not loop endlessly
+        while (is_string($parentName) && ! in_array($parentName, $names, true)) {
+            array_unshift($names, $parentName);
 
-        return $cacheBlock;
-    }
-
-    /**
-     * @throws LocalizedException
-     */
-    public function addUncachedBlock(AbstractBlock $block): Block
-    {
-        $cacheBlock = $this->addBlock($block);
-
-        $cacheBlock->setUncached(true);
-
-        return $cacheBlock;
-    }
-
-    public function getBlock(string $blockName): Block
-    {
-        if (array_key_exists(
-            $blockName,
-            $this->blocks
-        )) {
-            return $this->blocks[ $blockName ];
+            $parentName = $layout?->getParentName($parentName);
         }
 
-        return new Block();
-    }
-
-    protected function getLayoutName(LayoutInterface $layout, string $nameInLayout): string
-    {
-        $parentName = $layout->getParentName($nameInLayout);
-
-        if ($parentName === false) {
-            return $nameInLayout;
-        }
-
-        return sprintf(
-            '%s/%s',
-            $this->getLayoutName(
-                $layout,
-                $parentName
-            ),
-            $nameInLayout
-        );
-    }
-
-    public function getStarted(): float
-    {
-        return $this->started;
-    }
-
-    public function setStarted(float $started): void
-    {
-        $this->started = $started;
-    }
-
-    public function getFinished(): float
-    {
-        return $this->finished;
-    }
-
-    public function setFinished(float $finished): void
-    {
-        $this->finished = $finished;
-    }
-
-    public function getDuration(): float
-    {
-        return round(($this->getFinished() - $this->getStarted()) * 1000);
+        return implode('/', $names);
     }
 }

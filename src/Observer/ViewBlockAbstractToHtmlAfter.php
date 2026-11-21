@@ -2,102 +2,86 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Observer;
 
+use Infrangible\CacheUsage\Helper\Data;
 use Infrangible\CacheUsage\Model\Cache;
-use Infrangible\Core\Helper\Stores;
-use Magento\Framework\App\Cache\StateInterface;
 use Magento\Framework\DataObject;
+use Magento\Framework\Escaper;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\View\Element\AbstractBlock;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Finishes measuring the rendering of the block and marks it with a border of the color of its cache state, if
+ * configured.
  */
 class ViewBlockAbstractToHtmlAfter implements ObserverInterface
 {
-    /** @var Stores */
-    protected $storeHelper;
-
-    /** @var StateInterface */
-    protected $cacheState;
-
-    /** @var Cache */
-    protected $cache;
-
-    public function __construct(Stores $storeHelper, StateInterface $cacheState, Cache $cache)
+    /**
+     * @param Data $helper
+     * @param Cache $cache
+     * @param Escaper $escaper
+     */
+    public function __construct(protected Data $helper, protected Cache $cache, protected Escaper $escaper)
     {
-        $this->storeHelper = $storeHelper;
-        $this->cacheState = $cacheState;
-        $this->cache = $cache;
     }
 
+    /**
+     * Finishes measuring the rendering of the block and marks it.
+     *
+     * @param Observer $observer
+     *
+     * @return void
+     */
     public function execute(Observer $observer): void
     {
-        if ($this->cacheState->isEnabled(AbstractBlock::CACHE_GROUP)) {
-            /** @var AbstractBlock $block */
-            $block = $observer->getEvent()->getData('block');
+        $block = $observer->getEvent()->getData('block');
+        $transport = $observer->getEvent()->getData('transport');
 
-            /** @var DataObject $transport */
-            $transport = $observer->getEvent()->getData('transport');
+        if (! $block instanceof AbstractBlock || ! $transport instanceof DataObject ||
+            ! $this->helper->isBlocksEnabled()) {
 
-            $html = $transport->getData('html');
-
-            $blockName = $block->getNameInLayout();
-
-            if ($blockName === null) {
-                $blockName = $this->cache->generateBlockName($block);
-            }
-
-            $cacheBlock = $this->cache->getBlock($blockName);
-
-            $cacheBlock->setFinished(microtime(true));
-
-            $borderClass = null;
-
-            if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/enable')) {
-                if ($cacheBlock->isUncacheable() &&
-                    $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_uncacheable')) {
-                    $borderClass = 'block-uncacheable';
-                } elseif ($cacheBlock->isCached() &&
-                    $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_cached')) {
-                    $borderClass = 'block-cached';
-                } elseif ($cacheBlock->isUncached() &&
-                    $this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_uncached')) {
-                    $borderClass = 'block-uncached';
-                } elseif ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/blocks/mark_default')) {
-                    $borderClass = 'block-default';
-                }
-            }
-
-            if ($borderClass) {
-                $html = sprintf(
-                    '
-<div class="block-info %s">
-<div class="block-info-details">
-    <a href="#" class="block-info-details-icon">
-        <!--suppress HtmlRequiredAltAttribute, RequiredAttributes -->
-        <img>
-    </a>
-    <span class="block-info-details-content">Layout: %s<br/>Class: %s<br/>Template: %s</span>
-</div>
-%s
-</div>',
-                    $borderClass,
-                    $cacheBlock->getLayoutName(),
-                    $cacheBlock->getClassName(),
-                    $cacheBlock->getTemplateName(),
-                    $html
-                );
-            }
-
-            $transport->setData(
-                'html',
-                $html
-            );
+            return;
         }
+
+        $cacheBlock = $this->cache->getBlock($this->cache->getBlockName($block));
+
+        if ($cacheBlock === null) {
+            return;
+        }
+
+        $cacheBlock->setFinished(microtime(true));
+
+        $state = $cacheBlock->getState();
+        $html = $transport->getData('html');
+
+        // blocks without output get no border, which would only show an empty box
+        if (! is_string($html) || trim($html) === '' || ! $this->helper->isBlocksMarked($state)) {
+            return;
+        }
+
+        $transport->setData(
+            'html',
+            sprintf(
+                '<div class="block-info block-%s"><div class="block-info-details">' .
+                '<span class="block-info-details-icon">i</span><span class="block-info-details-content">' .
+                '%s: %s<br/>%s: %s<br/>%s: %s</span></div>%s</div>',
+                $state,
+                $this->escaper->escapeHtml(__('Layout')->render()),
+                $this->escaper->escapeHtml((string)$cacheBlock->getLayoutName()),
+                $this->escaper->escapeHtml(__('Class')->render()),
+                $this->escaper->escapeHtml((string)$cacheBlock->getClassName()),
+                $this->escaper->escapeHtml(__('Template')->render()),
+                $this->escaper->escapeHtml((string)$cacheBlock->getTemplateName()),
+                $html
+            )
+        );
     }
 }

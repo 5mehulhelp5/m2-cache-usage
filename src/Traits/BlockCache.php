@@ -2,16 +2,22 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Traits;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Settings of the grid of the block cache usage for its controllers: only viewing and deleting.
  */
 trait BlockCache
 {
     /**
+     * Returns the key of the module.
+     *
      * @return string
      */
     protected function getModuleKey(): string
@@ -20,6 +26,8 @@ trait BlockCache
     }
 
     /**
+     * Returns the key of the ACL resource.
+     *
      * @return string
      */
     protected function getResourceKey(): string
@@ -28,6 +36,8 @@ trait BlockCache
     }
 
     /**
+     * Returns the key of the menu entry.
+     *
      * @return string
      */
     protected function getMenuKey(): string
@@ -36,6 +46,8 @@ trait BlockCache
     }
 
     /**
+     * Returns the title of the grid.
+     *
      * @return string
      */
     protected function getTitle(): string
@@ -44,6 +56,8 @@ trait BlockCache
     }
 
     /**
+     * Returns the name of the model.
+     *
      * @return string
      */
     protected function getObjectName(): string
@@ -52,6 +66,8 @@ trait BlockCache
     }
 
     /**
+     * Entries cannot be added.
+     *
      * @return bool
      */
     protected function allowAdd(): bool
@@ -60,6 +76,8 @@ trait BlockCache
     }
 
     /**
+     * Entries cannot be edited.
+     *
      * @return bool
      */
     protected function allowEdit(): bool
@@ -68,6 +86,8 @@ trait BlockCache
     }
 
     /**
+     * Entries cannot be viewed.
+     *
      * @return bool
      */
     protected function allowView(): bool
@@ -76,6 +96,8 @@ trait BlockCache
     }
 
     /**
+     * Entries can be deleted.
+     *
      * @return bool
      */
     protected function allowDelete(): bool
@@ -84,10 +106,12 @@ trait BlockCache
     }
 
     /**
+     * Returns the message for a missing entry, with %s for its ID.
+     *
      * @return string
      */
     protected function getObjectNotFoundMessage(): string
     {
-        return __('Unable to find block cache with id: %s!')->render();
+        return __('Unable to find the block cache entry with ID: %s')->render();
     }
 }

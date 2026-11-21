@@ -2,17 +2,22 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Traits;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Name and class of the task that removes the collected cache usage older than 30 days, for its controller, cron
+ * job and console command.
  */
 trait Reduce
 {
     /**
-     * Returns the name of the task to initialize
+     * Returns the name of the task, which is also the name of its configuration section (task_<name>).
      *
      * @return string
      */
@@ -22,7 +27,7 @@ trait Reduce
     }
 
     /**
-     * Returns the name of the task to initialize
+     * Returns the class of the task.
      *
      * @return string
      */

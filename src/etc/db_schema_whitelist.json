@@ -1,0 +1,75 @@
+{
+    "cache_usage_fpc": {
+        "column": {
+            "id": true,
+            "route": true,
+            "controller": true,
+            "action": true,
+            "path": true,
+            "query": true,
+            "cacheable": true,
+            "cached": true,
+            "duration": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_ACTION": true,
+            "CACHE_USAGE_FPC_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_FPC_CREATED_AT": true,
+            "CACHE_USAGE_FPC_ROUTE": true,
+            "CACHE_USAGE_FPC_ROUTE_CACHEABLE": true,
+            "CACHE_USAGE_FPC_ROUTE_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_CACHEABLE": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_ACTION_CACHEABLE": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_ACTION_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_ACTION_PATH": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_ACTION_PATH_CACHEABLE": true,
+            "CACHE_USAGE_FPC_ROUTE_CONTROLLER_ACTION_PATH_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_FPC_CACHEABLE": true,
+            "CACHE_USAGE_FPC_CACHED": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "cache_usage_block": {
+        "column": {
+            "id": true,
+            "route": true,
+            "controller": true,
+            "action": true,
+            "path": true,
+            "query": true,
+            "layout_name": true,
+            "class_name": true,
+            "template_name": true,
+            "cacheable": true,
+            "cached": true,
+            "duration": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_ACTION": true,
+            "CACHE_USAGE_BLOCK_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_BLOCK_CREATED_AT": true,
+            "CACHE_USAGE_BLOCK_ROUTE": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CACHEABLE": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_CACHEABLE": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_ACTION_CACHEABLE": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_ACTION_CACHEABLE_CACHED": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_ACTION_PATH": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_ACTION_PATH_CACHEABLE": true,
+            "CACHE_USAGE_BLOCK_ROUTE_CONTROLLER_ACTION_PATH_CACHEABLE_CACHED": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

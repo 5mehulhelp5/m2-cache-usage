@@ -2,41 +2,45 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Plugin\Framework\Cache;
 
-use Magento\Framework\Exception\LocalizedException;
+use Closure;
+use Infrangible\CacheUsage\Helper\Data;
+use Infrangible\CacheUsage\Model\Cache;
 use Magento\Framework\View\Element\AbstractBlock;
 use ReflectionException;
 use ReflectionFunction;
-use Infrangible\CacheUsage\Model\Cache;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Records whether a block is loaded from the block cache: blocks load their cache with
+ * LockGuardedCacheLoader::lockedLoadData() and a closure of the block as data loader.
  */
 class LockGuardedCacheLoader
 {
-    /** @var Cache */
-    protected $cache;
-
     /**
+     * @param Data $helper
      * @param Cache $cache
      */
-    public function __construct(Cache $cache)
+    public function __construct(protected Data $helper, protected Cache $cache)
     {
-        $this->cache = $cache;
     }
 
     /**
-     * @param \Magento\Framework\Cache\LockGuardedCacheLoader $subject
-     * @param string                                          $lockName
-     * @param callable                                        $dataLoader
-     * @param callable                                        $dataCollector
-     * @param callable                                        $dataSaver
+     * Wraps the data loader of a block, so that the result of loading the block cache is recorded.
      *
-     * @return array
-     * @throws LocalizedException
+     * @param \Magento\Framework\Cache\LockGuardedCacheLoader $subject
+     * @param string $lockName
+     * @param callable $dataLoader
+     * @param callable $dataCollector
+     * @param callable $dataSaver
+     *
+     * @return array{0: string, 1: callable, 2: callable, 3: callable}|null
      * @noinspection PhpUnusedParameterInspection
      */
     public function beforeLockedLoadData(
@@ -44,27 +48,52 @@ class LockGuardedCacheLoader
         string $lockName,
         callable $dataLoader,
         callable $dataCollector,
-        callable $dataSaver): array
-    {
-        if (preg_match(sprintf('/^%s/', AbstractBlock::CACHE_KEY_PREFIX), $lockName)) {
-            try {
-                $reflectionClosure = new ReflectionFunction($dataLoader);
-
-                $closureClassInstance = $reflectionClosure->getClosureThis();
-
-                if ($closureClassInstance instanceof AbstractBlock) {
-                    $cachedData = $dataLoader();
-
-                    if ($cachedData === false) {
-                        $this->cache->addUncachedBlock($closureClassInstance);
-                    } else {
-                        $this->cache->addCachedBlock($closureClassInstance);
-                    }
-                }
-            } catch (ReflectionException $exception) {
-            }
+        callable $dataSaver
+    ): ?array {
+        if (! str_starts_with($lockName, AbstractBlock::CACHE_KEY_PREFIX) || ! $this->helper->isBlocksEnabled()) {
+            return null;
         }
 
-        return [$lockName, $dataLoader, $dataCollector, $dataSaver];
+        $block = $this->getBlock($dataLoader);
+
+        if ($block === null) {
+            return null;
+        }
+
+        $recordingDataLoader = function () use ($dataLoader, $block): mixed {
+            $data = $dataLoader();
+
+            // the loader runs again after waiting for the lock of another request, the last result counts
+            $cacheBlock = $this->cache->addBlock($block);
+
+            $cacheBlock->setCached($data !== false);
+            $cacheBlock->setUncached($data === false);
+
+            return $data;
+        };
+
+        return [$lockName, $recordingDataLoader, $dataCollector, $dataSaver];
+    }
+
+    /**
+     * Returns the block whose closure the data loader is, or null.
+     *
+     * @param callable $dataLoader
+     *
+     * @return AbstractBlock|null
+     */
+    private function getBlock(callable $dataLoader): ?AbstractBlock
+    {
+        if (! $dataLoader instanceof Closure) {
+            return null;
+        }
+
+        try {
+            $block = (new ReflectionFunction($dataLoader))->getClosureThis();
+        } catch (ReflectionException) {
+            return null;
+        }
+
+        return $block instanceof AbstractBlock ? $block : null;
     }
 }

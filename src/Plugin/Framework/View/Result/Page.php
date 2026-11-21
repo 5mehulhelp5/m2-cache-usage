@@ -2,67 +2,72 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CacheUsage\Plugin\Framework\View\Result;
 
-use Infrangible\Core\Helper\Stores;
+use Infrangible\CacheUsage\Helper\Data;
+use Infrangible\CacheUsage\Model\Summary;
 use Magento\Framework\App\Response\HttpInterface;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Adds the layout handles and the layout XML of the page below the page, if configured.
  */
 class Page
 {
-    /** @var Stores */
-    protected $storeHelper;
-
-    public function __construct(Stores $storeHelper)
+    /**
+     * @param Data $helper
+     * @param Summary $summary
+     */
+    public function __construct(protected Data $helper, protected Summary $summary)
     {
-        $this->storeHelper = $storeHelper;
     }
 
-    public function aroundRenderResult(
+    /**
+     * Adds the layout handles and the layout XML after the page.
+     *
+     * @param \Magento\Framework\View\Result\Page $subject
+     * @param \Magento\Framework\View\Result\Page $result
+     * @param HttpInterface $response
+     *
+     * @return \Magento\Framework\View\Result\Page
+     */
+    public function afterRenderResult(
         \Magento\Framework\View\Result\Page $subject,
-        callable $proceed,
+        \Magento\Framework\View\Result\Page $result,
         HttpInterface $response
     ): \Magento\Framework\View\Result\Page {
-        $result = $proceed($response);
-
-        if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/layout/show_handles')) {
-            $handles = $subject->getLayout()->getUpdate()->getHandles();
-
+        if ($this->helper->isShowHandles()) {
             $response->appendBody(
-                sprintf(
-                    '<pre>%s%s--------------------%s%s</pre>',
-                    __('Layout Handles'),
-                    PHP_EOL,
-                    PHP_EOL,
-                    implode(
-                        '<br />',
-                        $handles
-                    )
+                $this->summary->getSection(
+                    __('Layout Handles')->render(),
+                    $subject->getLayout()->getUpdate()->getHandles()
                 )
             );
         }
 
-        if ($this->storeHelper->getStoreConfigFlag('infrangible_cache_usage/layout/show_xml')) {
-            $dom = new \DOMDocument('1.0');
-            $dom->preserveWhiteSpace = false;
-            $dom->formatOutput = true;
-            $dom->loadXML($subject->getLayout()->getUpdate()->getFileLayoutUpdatesXml()->asXML());
-
+        if ($this->helper->isShowXml()) {
             $response->appendBody(
-                sprintf(
-                    '<pre>%s%s--------------------%s%s</pre>',
-                    __('Layout XML'),
-                    PHP_EOL,
-                    PHP_EOL,
-                    htmlentities($dom->saveXML())
-                )
+                $this->summary->getSection(__('Layout XML')->render(), [$this->getLayoutXml($subject)])
             );
         }
 
         return $result;
+    }
+
+    /**
+     * Returns the merged layout updates of the files of the page, formatted.
+     *
+     * @param \Magento\Framework\View\Result\Page $page
+     *
+     * @return string
+     */
+    protected function getLayoutXml(\Magento\Framework\View\Result\Page $page): string
+    {
+        return $page->getLayout()->getUpdate()->getFileLayoutUpdatesXml()->asNiceXml();
     }
 }

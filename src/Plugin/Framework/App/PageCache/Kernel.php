@@ -2,192 +2,91 @@
 
 declare(strict_types=1);
 
-namespace Infrangible\CacheUsage\Plugin\Framework\App\PageCache;
-
-use FeWeDev\Base\Arrays;
-use Infrangible\CacheUsage\Model\Cache;
-use Magento\Framework\App\ObjectManager;
-use Magento\Framework\App\PageCache\Identifier;
-use Magento\Framework\App\Request\Http;
-use Magento\Framework\Serialize\SerializerInterface;
-use Magento\PageCache\Model\Cache\Type;
-
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
+namespace Infrangible\CacheUsage\Plugin\Framework\App\PageCache;
+
+use Infrangible\CacheUsage\Model\Cache;
+use Magento\Framework\App\Response\Http;
+
+/**
+ * Measures loading and storing the page in the built-in full page cache, and records whether it was cached. While the
+ * kernel loads or stores the page, the plugin of the full page cache type loads or stores the data of the request.
  */
 class Kernel
 {
-    /** @var Arrays */
-    protected $arrayHelper;
+    /** Operation of the kernel that loads a page. */
+    public const OPERATION_LOAD = 'load';
 
-    /** @var Cache */
-    protected $cache;
+    /** Operation of the kernel that stores a page. */
+    public const OPERATION_PROCESS = 'process';
 
-    /** @var Http */
-    protected $request;
-
-    /** @var Identifier */
-    protected $identifier;
-
-    /** @var Type */
-    protected $fullPageCache;
-
-    /** @var SerializerInterface */
-    protected $serializer;
-
-    public function __construct(
-        Arrays $arrayHelper,
-        Cache $cache,
-        Http $request,
-        Identifier $identifier,
-        ?Type $fullPageCache = null,
-        ?SerializerInterface $serializer = null
-    ) {
-        $this->arrayHelper = $arrayHelper;
-
-        $this->cache = $cache;
-        $this->request = $request;
-        $this->identifier = $identifier;
-        $this->fullPageCache = $fullPageCache ?? ObjectManager::getInstance()->get(Type::class);
-        $this->serializer = $serializer ?? ObjectManager::getInstance()->get(SerializerInterface::class);
+    /**
+     * @param Cache $cache
+     */
+    public function __construct(protected Cache $cache)
+    {
     }
 
     /**
+     * Starts measuring and loads the page.
+     *
+     * @param \Magento\Framework\App\PageCache\Kernel $subject
+     * @param callable $proceed
+     *
+     * @return Http|false the cached page, or false
      * @noinspection PhpUnusedParameterInspection
      */
-    public function beforeLoad(\Magento\Framework\App\PageCache\Kernel $subject)
+    public function aroundLoad(\Magento\Framework\App\PageCache\Kernel $subject, callable $proceed): Http|false
     {
         $this->cache->setCacheable(false);
         $this->cache->setCached(false);
         $this->cache->setStarted(microtime(true));
+        $this->cache->setPageCacheOperation(self::OPERATION_LOAD);
 
-        return null;
-    }
+        try {
+            $result = $proceed();
+        } finally {
+            $this->cache->setPageCacheOperation(null);
+        }
 
-    /**
-     * @noinspection PhpUnusedParameterInspection
-     */
-    public function afterLoad(\Magento\Framework\App\PageCache\Kernel $subject, $result)
-    {
-        if ($result !== false) {
+        if ($result instanceof Http) {
             $this->cache->setCacheable(true);
             $this->cache->setCached(true);
+            $this->cache->setFinished(microtime(true));
 
-            $additionalData = $this->fullPageCache->load(
-                sprintf(
-                    '%s_additional',
-                    $this->identifier->getValue()
-                )
-            );
-
-            if ($additionalData) {
-                $this->cache->setFinished(microtime(true));
-
-                $additionalData = $this->serializer->unserialize($additionalData);
-
-                $this->cache->setRouteName(
-                    $this->arrayHelper->getValue(
-                        $additionalData,
-                        'route'
-                    )
-                );
-                $this->cache->setControllerName(
-                    $this->arrayHelper->getValue(
-                        $additionalData,
-                        'controller'
-                    )
-                );
-                $this->cache->setActionName(
-                    $this->arrayHelper->getValue(
-                        $additionalData,
-                        'action'
-                    )
-                );
-                $this->cache->setPathParameters(
-                    $this->arrayHelper->getValue(
-                        $additionalData,
-                        'path_parameters'
-                    )
-                );
-                $this->cache->setQueryParameters(
-                    $this->arrayHelper->getValue(
-                        $additionalData,
-                        'query_parameters'
-                    )
-                );
-                $this->cache->setBlocksData(
-                    $this->arrayHelper->getValue(
-                        $additionalData,
-                        'blocks'
-                    )
-                );
-            }
+            return $result;
         }
 
-        return $result;
+        return false;
     }
 
     /**
+     * Stores the page and finishes measuring.
+     *
+     * @param \Magento\Framework\App\PageCache\Kernel $subject
+     * @param callable $proceed
+     * @param Http $response
+     *
+     * @return void
      * @noinspection PhpUnusedParameterInspection
      */
-    public function beforeProcess(
+    public function aroundProcess(
         \Magento\Framework\App\PageCache\Kernel $subject,
-        \Magento\Framework\App\Response\Http $response
-    ): array {
-        if (preg_match(
-            '/public.*s-maxage=(\d+)/',
-            $response->getHeader('Cache-Control')->getFieldValue(),
-            $matches
-        )) {
-            $httpResponseCode = $response->getHttpResponseCode();
+        callable $proceed,
+        Http $response
+    ): void {
+        $this->cache->setPageCacheOperation(self::OPERATION_PROCESS);
 
-            if (($httpResponseCode == 200 || $httpResponseCode == 404) &&
-                ($this->request->isGet() || $this->request->isHead())) {
-
-                $tagsHeader = $response->getHeader('X-Magento-Tags');
-                $tags = $tagsHeader ? explode(
-                    ',',
-                    $tagsHeader->getFieldValue()
-                ) : [];
-
-                $maxAge = $matches[ 1 ];
-
-                $serializedData = $this->serializer->serialize($this->getData());
-
-                $this->fullPageCache->save(
-                    $serializedData,
-                    sprintf(
-                        '%s_additional',
-                        $this->identifier->getValue()
-                    ),
-                    $tags,
-                    intval($maxAge) + 1
-                );
-            }
+        try {
+            $proceed($response);
+        } finally {
+            $this->cache->setPageCacheOperation(null);
+            $this->cache->setFinished(microtime(true));
         }
-
-        return [$response];
-    }
-
-    /**
-     * @noinspection PhpUnusedParameterInspection
-     */
-    public function afterProcess(\Magento\Framework\App\PageCache\Kernel $subject)
-    {
-        $this->cache->setFinished(microtime(true));
-    }
-
-    protected function getData(): array
-    {
-        return [
-            'route'            => $this->cache->getRouteName(),
-            'controller'       => $this->cache->getControllerName(),
-            'action'           => $this->cache->getActionName(),
-            'path_parameters'  => $this->cache->getPathParameters(),
-            'query_parameters' => $this->cache->getQueryParameters(),
-            'blocks'           => $this->cache->getBlocks()
-        ];
     }
 }
